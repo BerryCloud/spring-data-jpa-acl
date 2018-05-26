@@ -37,5 +37,4 @@ public @interface AclRoleConditions {
      * The list of {@link AclRoleCondition} annotations
      */
     AclRoleCondition[] value();
-
 }

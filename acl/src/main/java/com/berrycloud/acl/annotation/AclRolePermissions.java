@@ -37,5 +37,4 @@ public @interface AclRolePermissions {
      * The list {@link AclRolePermission} annotations
      */
     AclRolePermission[] value();
-
 }

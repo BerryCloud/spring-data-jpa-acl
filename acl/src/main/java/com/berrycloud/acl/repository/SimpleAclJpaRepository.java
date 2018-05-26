@@ -152,12 +152,10 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
     @Transactional
     public void delete(ID id) {
         T entity = findOne(id, DELETE_PERMISSION);
-
         if (entity == null) {
             throw new EntityNotFoundException("Entity cannot be deleted");
         }
         deleteWithoutPermissionCheck(entity);
-
     }
 
     @Override
@@ -175,10 +173,8 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
     @Override
     @Transactional
     public void delete(T entity) {
-
         Assert.notNull(entity, "The entity must not be null!");
         delete((ID) (entityInformation.getId(entity)));
-
     }
 
     /*
@@ -229,7 +225,6 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
 
     @Override
     public List<T> findAll(Iterable<ID> ids, String permission) {
-
         if (ids == null || !ids.iterator().hasNext()) {
             return Collections.emptyList();
         }
@@ -306,7 +301,6 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
             }
 
         }, permission);
-
     }
 
     /*
@@ -321,7 +315,6 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
 
     @Override
     public T getOne(ID id, String permission) {
-
         T entity = this.findOne(id, permission);
         if (entity == null) {
             throw new EntityNotFoundException("Unable to find " + getDomainClass().getName() + " with id " + id);
@@ -367,7 +360,6 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
 
     @Override
     public T findOne(Specification<T> spec, String permission) {
-
         try {
             return getQuery(spec, (Sort) null, permission).getSingleResult();
         } catch (NoResultException e) {
@@ -485,7 +477,6 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
      */
     @Override
     protected <S extends T> TypedQuery<Long> getCountQuery(Specification<S> spec, Class<S> domainClass) {
-
         CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<Long> query = builder.createQuery(Long.class);
 
@@ -539,7 +530,6 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
     }
 
     private <S> TypedQuery<S> applyRepositoryMethodMetadata(TypedQuery<S> query) {
-
         if (metadata == null) {
             return query;
         }
@@ -553,7 +543,6 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
     }
 
     private void applyQueryHints(Query query) {
-
         for (Entry<String, Object> hint : getQueryHints().entrySet()) {
             query.setHint(hint.getKey(), hint.getValue());
         }
@@ -591,14 +580,14 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
         private String ownerIdName;
         private Serializable propertyId = null;
 
-        public PropertySpecification(ID id, PersistentProperty<? extends PersistentProperty<?>> property) {
+        PropertySpecification(ID id, PersistentProperty<? extends PersistentProperty<?>> property) {
             this.propertyName = property.getName();
             this.ownerId = id;
             this.ownerIdName = property.getOwner().getIdProperty().getName();
         }
 
-        public PropertySpecification(ID id, PersistentProperty<? extends PersistentProperty<?>> property,
-                Serializable propertyId) {
+        PropertySpecification(ID id, PersistentProperty<? extends PersistentProperty<?>> property,
+                              Serializable propertyId) {
             this(id, property);
             this.propertyId = propertyId;
         }
@@ -618,7 +607,6 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
 
             return predicate;
         }
-
     }
 
     /**
@@ -636,7 +624,7 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
 
         ParameterExpression<Iterable> parameter;
 
-        public ByIdsSpecification(JpaEntityInformation<T, ?> entityInformation) {
+        ByIdsSpecification(JpaEntityInformation<T, ?> entityInformation) {
             this.entityInformation = entityInformation;
         }
 

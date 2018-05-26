@@ -38,5 +38,4 @@ public @interface AclSelf {
      * Defines the list of permissions this users have on their own user-entity.
      */
     String[] value() default { ALL_PERMISSION };
-
 }

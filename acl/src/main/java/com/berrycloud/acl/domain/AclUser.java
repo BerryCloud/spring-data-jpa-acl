@@ -28,7 +28,7 @@ import com.berrycloud.acl.annotation.AclSelf;
  * interface. Users are handled automatically by the AclUserdetailsService (or its subclasses) and can gain permissions
  * to other entities via {@link AclRole} entities and Acl role annotations like {@link AclRolePermission} or
  * {@link AclRoleCondition}, Acl permission annotations like {@link AclOwner}, {@link AclParent} or {@link AclSelf}, or
- * via {@link permissionLink} entities.
+ * via {@link PermissionLink} entities.
  *
  * @author István Rátkai (Selindek)
  *

@@ -24,7 +24,7 @@ import com.berrycloud.acl.annotation.AclParent;
  */
 public class ParentData extends PropertyPermissionData {
 
-    private String permissionPrefix;
+    private final String permissionPrefix;
 
     public ParentData(String propertyName, String permissionPrefix, String[] permissions) {
         super(propertyName, permissions);
@@ -34,5 +34,4 @@ public class ParentData extends PropertyPermissionData {
     public String getPermissionPrefix() {
         return permissionPrefix;
     }
-
 }

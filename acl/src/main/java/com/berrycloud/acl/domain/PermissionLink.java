@@ -15,6 +15,8 @@
  */
 package com.berrycloud.acl.domain;
 
+import com.berrycloud.acl.annotation.AclOwner;
+
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,8 +24,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
-
-import com.berrycloud.acl.annotation.AclOwner;
 
 /**
  * A superclass for defining permission-links between a permission-owner and a permission-target entity.
@@ -37,13 +37,10 @@ import com.berrycloud.acl.annotation.AclOwner;
  * <li>{@code "all"} permission automatically grants all of the possible permissions.</li>
  * </ol>
  *
- * @author István Rátkai (Selindek)
- *
- * @param <O>
- *            Permission-Owner: should be a class what implements the {@link AclUser} interface or any domain class what
+ * @param <O> Permission-Owner: should be a class what implements the {@link AclUser} interface or any domain class what
  *            have a {@link AclUser} field or collection-like field containing {@link AclUser} entities.
- * @param <T>
- *            Permission-Target: could be any domain class.
+ * @param <T> Permission-Target: could be any domain class.
+ * @author István Rátkai (Selindek)
  */
 @MappedSuperclass
 public abstract class PermissionLink<O, T> {
@@ -108,5 +105,4 @@ public abstract class PermissionLink<O, T> {
     public void setPermission(final String permission) {
         this.permission = permission;
     }
-
 }

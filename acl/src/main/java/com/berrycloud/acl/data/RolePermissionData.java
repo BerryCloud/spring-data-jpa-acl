@@ -24,7 +24,7 @@ import com.berrycloud.acl.annotation.AclRolePermission;
  */
 public class RolePermissionData extends PermissionData {
 
-    private String[] authorities;
+    private final String[] authorities;
 
     public RolePermissionData(String[] authorities, String[] permissions) {
         super(permissions);
@@ -34,5 +34,4 @@ public class RolePermissionData extends PermissionData {
     public String[] getAuthorities() {
         return authorities;
     }
-
 }

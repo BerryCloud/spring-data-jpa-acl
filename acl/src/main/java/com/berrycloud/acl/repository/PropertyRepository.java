@@ -15,17 +15,17 @@
  */
 package com.berrycloud.acl.repository;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mapping.PersistentProperty;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.io.Serializable;
+
 /**
  * Interface for repositories with property support.
  *
  * @author István Rátkai (Selindek)
  */
-import java.io.Serializable;
-
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.mapping.PersistentProperty;
-import org.springframework.security.access.prepost.PreAuthorize;
-
 public interface PropertyRepository<T, ID extends Serializable> {
 
     Object findProperty(ID id, PersistentProperty<? extends PersistentProperty<?>> property, Pageable pageable);
@@ -34,19 +34,17 @@ public interface PropertyRepository<T, ID extends Serializable> {
 
     /**
      * Helper method for calling clear on the EntityManager.
-     *
      */
     void clear();
 
     /**
      * Update the entity without permission check. This method should be used with extreme caution. The permission
      * should be checked manually before using this method. (I.e. methods protected by {@link PreAuthorize} annotation.)
-     * This method is used by {@link RepositoryAclPropertyReferenceController} where the permissions are checked for the
-     * entity and all the modified properties manually before update.
-     * 
+     * This method is used by {@link org.springframework.data.rest.webmvc.RepositoryAclPropertyReferenceController}
+     * where the permissions are checked for the entity and all the modified properties manually before update.
+     *
      * @param entity
      * @return merged entity
      */
     <S extends T> S saveWithoutPermissionCheck(S entity);
-
 }

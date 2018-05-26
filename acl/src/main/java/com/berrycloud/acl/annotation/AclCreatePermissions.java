@@ -37,5 +37,4 @@ public @interface AclCreatePermissions {
      * The list {@link AclCreatePermission} annotations
      */
     AclCreatePermission[] value();
-
 }

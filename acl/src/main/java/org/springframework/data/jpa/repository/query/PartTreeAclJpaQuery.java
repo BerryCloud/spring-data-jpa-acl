@@ -61,9 +61,9 @@ public class PartTreeAclJpaQuery extends AbstractJpaQuery {
      *
      * @param method
      *            must not be {@literal null}.
-     * @param factory
-     *            must not be {@literal null}.
      * @param em
+     *            must not be {@literal null}.
+     * @param persistenceProvider
      *            must not be {@literal null}.
      */
     public PartTreeAclJpaQuery(JpaQueryMethod method, EntityManager em, PersistenceProvider persistenceProvider,
@@ -130,10 +130,8 @@ public class PartTreeAclJpaQuery extends AbstractJpaQuery {
 
         private final PersistenceProvider persistenceProvider;
 
-        public QueryPreparer(PersistenceProvider persistenceProvider) {
-
+        QueryPreparer(PersistenceProvider persistenceProvider) {
             this.persistenceProvider = persistenceProvider;
-
         }
 
         /**
@@ -143,7 +141,6 @@ public class PartTreeAclJpaQuery extends AbstractJpaQuery {
          * @return
          */
         public Query createQuery(Object[] values) {
-
             ParametersParameterAccessor accessor = new ParametersParameterAccessor(parameters, values);
 
             JpaQueryCreator creator = createCreator(accessor, persistenceProvider);
@@ -170,7 +167,6 @@ public class PartTreeAclJpaQuery extends AbstractJpaQuery {
          * @return
          */
         private Query restrictMaxResultsIfNecessary(Query query) {
-
             if (tree.isLimiting()) {
 
                 if (query.getMaxResults() != Integer.MAX_VALUE) {

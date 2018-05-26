@@ -15,16 +15,15 @@
  */
 package com.berrycloud.acl.annotation;
 
-import static com.berrycloud.acl.AclConstants.ALL_PERMISSION;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import com.berrycloud.acl.repository.NoAcl;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.berrycloud.acl.repository.NoAcl;
+import static com.berrycloud.acl.AclConstants.ALL_PERMISSION;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Defines a list of permissions for a list of roles for this domain object. All of the users who has at least one role
@@ -61,7 +60,6 @@ import com.berrycloud.acl.repository.NoAcl;
 @Target({ TYPE })
 @Retention(RUNTIME)
 @Documented
-@Repeatable(value = AclRolePermissions.class)
 public @interface AclRolePermission {
 
     /**

@@ -41,13 +41,14 @@ public class SimpleAclUser implements AclUser {
 
     @Column(unique = true, nullable = false)
     private String username;
+
     @JsonIgnore
     private String password;
 
     @ManyToMany
     private Set<SimpleAclRole> aclRoles;
 
-    public SimpleAclUser() {
+    protected SimpleAclUser() {
     }
 
     public SimpleAclUser(String username) {
@@ -93,5 +94,4 @@ public class SimpleAclUser implements AclUser {
     public void setPassword(String password) {
         this.password = password;
     }
-
 }

@@ -15,8 +15,9 @@
  */
 package com.berrycloud.acl.configuration;
 
+import com.berrycloud.acl.AclLogic;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -45,6 +46,10 @@ import com.berrycloud.acl.data.AclMetaData;
 import com.berrycloud.acl.security.SimpleAclUserDetailsService;
 import com.berrycloud.acl.security.access.AclPermissionEvaluator;
 
+import javax.persistence.EntityManager;
+
+import static com.berrycloud.acl.AclConstants.ALL_PERMISSION;
+
 /**
  * Main ACL configuration class.
  *
@@ -56,8 +61,11 @@ import com.berrycloud.acl.security.access.AclPermissionEvaluator;
 @Import(AclRepositoryRestConfiguration.class)
 public class AclConfiguration {
 
-    @Autowired
-    ApplicationContext context;
+    @Value("${spring.data.jpa.acl.max-depth:2}")
+    private int maxDepth;
+
+    @Value("${spring.data.jpa.acl.self-permissions:" + ALL_PERMISSION + "}")
+    private String[] defaultSelfPermissions;
 
     /**
      * We replace the stock repostiories with our modified subclass. It correctly prioritises the repository interfaces,
@@ -65,7 +73,7 @@ public class AclConfiguration {
      * configuration class because we use it in the PermissionEvaluator too.
      */
     @Bean
-    public Repositories repositories() {
+    public Repositories repositories(ApplicationContext context) {
         return new ExportAwareRepositories(context);
     }
 
@@ -87,19 +95,19 @@ public class AclConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(UserDetailsService.class)
-    public SimpleAclUserDetailsService aclUserDetailsService() {
-        return new SimpleAclUserDetailsService();
+    public SimpleAclUserDetailsService aclUserDetailsService(AclLogic aclLogic) {
+        return new SimpleAclUserDetailsService(aclLogic);
     }
 
     @Bean
     @ConditionalOnMissingBean(PermissionEvaluator.class)
-    public AclPermissionEvaluator AclPermissionEvaluator() {
-        return new AclPermissionEvaluator();
+    public AclPermissionEvaluator AclPermissionEvaluator(EntityManager em, AclSpecification aclSpecification) {
+        return new AclPermissionEvaluator(em, aclSpecification);
     }
 
     @Bean
-    public AclLogicImpl aclLogic() {
-        return new AclLogicImpl();
+    public AclLogicImpl aclLogic(EntityManager em) {
+        return new AclLogicImpl(em, defaultSelfPermissions);
     }
 
     @Bean
@@ -108,13 +116,12 @@ public class AclConfiguration {
     }
 
     @Bean
-    public AclMetaData aclMetaData() {
-        return aclLogic().createAclMetaData();
+    public AclMetaData aclMetaData(AclLogic aclLogic) {
+        return aclLogic.createAclMetaData();
     }
 
     @Bean
-    public AclSpecification aclSpecification() {
-        return new AclUserPermissionSpecification();
+    public AclSpecification aclSpecification(AclMetaData aclMetaData) {
+        return new AclUserPermissionSpecification(aclUtils(), aclMetaData, maxDepth);
     }
-
 }

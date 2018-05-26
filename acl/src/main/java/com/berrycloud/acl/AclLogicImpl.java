@@ -15,45 +15,6 @@
  */
 package com.berrycloud.acl;
 
-import static com.berrycloud.acl.AclConstants.ALL_PERMISSION;
-import static com.berrycloud.acl.AclConstants.PERMISSION_PREFIX_DELIMITER;
-import static com.berrycloud.acl.AclConstants.ROLE_ADMIN;
-import static com.berrycloud.acl.AclConstants.ROLE_USER;
-
-import java.beans.PropertyDescriptor;
-import java.io.Serializable;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.OneToMany;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.IdentifiableType;
-import javax.persistence.metamodel.ManagedType;
-import javax.persistence.metamodel.SingularAttribute;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.data.jpa.repository.support.JpaEntityInformation;
-import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.berrycloud.acl.annotation.AclCreatePermission;
 import com.berrycloud.acl.annotation.AclCreatePermissions;
 import com.berrycloud.acl.annotation.AclOwner;
@@ -78,6 +39,44 @@ import com.berrycloud.acl.domain.PermissionLink;
 import com.berrycloud.acl.domain.SimpleAclRole;
 import com.berrycloud.acl.domain.SimpleAclUser;
 import com.berrycloud.acl.repository.NoAcl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.OneToMany;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.IdentifiableType;
+import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.SingularAttribute;
+import java.beans.PropertyDescriptor;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static com.berrycloud.acl.AclConstants.ALL_PERMISSION;
+import static com.berrycloud.acl.AclConstants.PERMISSION_PREFIX_DELIMITER;
+import static com.berrycloud.acl.AclConstants.ROLE_ADMIN;
+import static com.berrycloud.acl.AclConstants.ROLE_USER;
 
 /**
  * Default implementation of the {@link AclLogic}
@@ -88,16 +87,19 @@ public class AclLogicImpl implements AclLogic {
 
     private static Logger LOG = LoggerFactory.getLogger(AclLogicImpl.class);
 
-    @PersistenceContext
-    private EntityManager em;
-
-    @Value("${spring.data.jpa.acl.self-permissions:" + ALL_PERMISSION + "}")
+    private final EntityManager em;
     private String[] defaultSelfPermissions;
 
     private Class<AclUser> aclUserType;
     private JpaEntityInformation<AclUser, ?> userInformation;
     private Class<AclRole> aclRoleType;
     private Set<Class<?>> javaTypes;
+
+    public AclLogicImpl(EntityManager em,
+                        @Value("${spring.data.jpa.acl.self-permissions:" + ALL_PERMISSION + "}") String[] defaultSelfPermissions) {
+        this.em = em;
+        this.defaultSelfPermissions = defaultSelfPermissions;
+    }
 
     @SuppressWarnings("unchecked")
     @Transactional
@@ -110,9 +112,7 @@ public class AclLogicImpl implements AclLogic {
 
         addDefaultUsersIfNeeded();
 
-        Map<Class<?>, AclEntityMetaData> metaDataMap = createMetaDataMap();
-
-        return new AclMetaData(metaDataMap, new PermissionData(defaultSelfPermissions));
+        return new AclMetaData(createMetaDataMap(), new PermissionData(defaultSelfPermissions));
     }
 
     private void createJavaTypeSet() {
@@ -123,7 +123,6 @@ public class AclLogicImpl implements AclLogic {
                 javaTypes.add(type);
             }
         }
-
     }
 
     @Override
@@ -175,15 +174,15 @@ public class AclLogicImpl implements AclLogic {
 
         try {
             // We use BeanWrapper for checking annotations on fields AND getters and setters too
-            BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(javaType.newInstance());
+            BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(javaType.getDeclaredConstructor().newInstance());
             for (final PropertyDescriptor propertyDescriptor : beanWrapper.getPropertyDescriptors()) {
                 final String propertyName = propertyDescriptor.getName();
                 final TypeDescriptor typeDescriptor = beanWrapper.getPropertyTypeDescriptor(propertyName);
                 checkAclOwner(metaData, javaType, propertyName, typeDescriptor);
                 checkAclParent(metaData, javaType, propertyName, typeDescriptor);
-                checkAclPermissionLinks(metaData, javaType, propertyName, typeDescriptor);
+                checkAclPermissionLinks(metaData, propertyName, typeDescriptor);
             }
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             LOG.error("Cannot instantiate {} ", javaType);
         }
         checkSelfPermissions(javaType);
@@ -201,36 +200,37 @@ public class AclLogicImpl implements AclLogic {
         for (AclCreatePermission createPermission : createPermissions) {
             metaData.getCreatePermissionList().add(new CreatePermissionData(createPermission.roles()));
         }
-
     }
 
     private void checkAclRolePermission(AclEntityMetaData metaData, Class<?> javaType) {
         Set<AclRolePermission> rolePermissions = AnnotationUtils.getDeclaredRepeatableAnnotations(javaType,
                 AclRolePermission.class, AclRolePermissions.class);
+
         for (AclRolePermission rolePermission : rolePermissions) {
             metaData.getRolePermissionList()
                     .add(new RolePermissionData(rolePermission.roles(), rolePermission.value()));
         }
+
         if (metaData.getRolePermissionList().isEmpty()) {
             // Add default behaviour - users with ROLE_ADMIN role automatically gain all permissions
             metaData.getRolePermissionList()
-                    .add(new RolePermissionData(new String[] { ROLE_ADMIN }, new String[] { ALL_PERMISSION }));
+                    .add(new RolePermissionData(new String[]{ROLE_ADMIN}, new String[]{ALL_PERMISSION}));
         }
-
     }
 
     private void checkAclRoleCondition(AclEntityMetaData metaData, Class<?> javaType) {
         Set<AclRoleCondition> roleConditions = AnnotationUtils.getDeclaredRepeatableAnnotations(javaType,
                 AclRoleCondition.class, AclRoleConditions.class);
+
         for (AclRoleCondition roleCondition : roleConditions) {
             metaData.getRoleConditionList().add(new RolePermissionData(roleCondition.roles(), roleCondition.value()));
         }
+
         if (metaData.getRoleConditionList().isEmpty()) {
             // Add default behaviour - users with ANY roles could gain any permissions
             metaData.getRoleConditionList()
-                    .add(new RolePermissionData(new String[] {}, new String[] { ALL_PERMISSION }));
+                    .add(new RolePermissionData(new String[]{}, new String[]{ALL_PERMISSION}));
         }
-
     }
 
     private void checkNoAcl(AclEntityMetaData metaData, Class<?> javaType) {
@@ -240,7 +240,7 @@ public class AclLogicImpl implements AclLogic {
             metaData.getRolePermissionList().clear();
             // Turn off ACL - users with ANY roles automatically gain all permissions
             metaData.getRolePermissionList()
-                    .add(new RolePermissionData(new String[] {}, new String[] { ALL_PERMISSION }));
+                    .add(new RolePermissionData(new String[]{}, new String[]{ALL_PERMISSION}));
         }
     }
 
@@ -257,8 +257,9 @@ public class AclLogicImpl implements AclLogic {
         }
     }
 
-    private void checkAclPermissionLinks(AclEntityMetaData metaData, Class<?> javaType, String propertyName,
-            TypeDescriptor typeDescriptor) {
+    private void checkAclPermissionLinks(AclEntityMetaData metaData,
+                                         String propertyName,
+                                         TypeDescriptor typeDescriptor) {
         final OneToMany oneToMany = typeDescriptor.getAnnotation(OneToMany.class);
         if (oneToMany != null && (typeDescriptor.isCollection() || typeDescriptor.isArray())
                 && PermissionLink.class.isAssignableFrom(typeDescriptor.getElementTypeDescriptor().getType())) {
@@ -270,7 +271,7 @@ public class AclLogicImpl implements AclLogic {
     }
 
     private void checkAclOwner(AclEntityMetaData metaData, Class<?> javaType, final String propertyName,
-            final TypeDescriptor typeDescriptor) {
+                               final TypeDescriptor typeDescriptor) {
         final AclOwner aclOwner = typeDescriptor.getAnnotation(AclOwner.class);
         if (aclOwner != null) {
             if (AclUser.class.isAssignableFrom(typeDescriptor.getObjectType())) {
@@ -303,13 +304,13 @@ public class AclLogicImpl implements AclLogic {
     }
 
     private void checkAclParent(AclEntityMetaData metaData, Class<?> javaType, final String propertyName,
-            final TypeDescriptor typeDescriptor) {
+                                final TypeDescriptor typeDescriptor) {
         final AclParent aclParent = typeDescriptor.getAnnotation(AclParent.class);
         if (aclParent != null) {
             if (isManagedType(typeDescriptor.getObjectType())
                     || ((typeDescriptor.isArray() || typeDescriptor.isCollection())
-                            && typeDescriptor.getElementTypeDescriptor() != null
-                            && isManagedType(typeDescriptor.getElementTypeDescriptor().getObjectType()))) {
+                    && typeDescriptor.getElementTypeDescriptor() != null
+                    && isManagedType(typeDescriptor.getElementTypeDescriptor().getObjectType()))) {
                 if (aclParent.prefix().indexOf(PERMISSION_PREFIX_DELIMITER) != -1) {
                     LOG.warn("@AclParent's prefix property contains illegal character at '{}.{}' ... ignored", javaType,
                             propertyName);
@@ -326,9 +327,7 @@ public class AclLogicImpl implements AclLogic {
 
     @Override
     public Set<AclRole> getAllRoles(AclUser aclUser) {
-
-        Set<AclRole> roleSet = new HashSet<>();
-        roleSet.addAll(getRoles(aclUser));
+        Set<AclRole> roleSet = new HashSet<>(getRoles(aclUser));
 
         BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(aclUser);
         for (final PropertyDescriptor propertyDescriptor : beanWrapper.getPropertyDescriptors()) {
@@ -391,6 +390,7 @@ public class AclLogicImpl implements AclLogic {
         if (aclUser == null) {
             throw (new UsernameNotFoundException("User with username'" + username + "' cannot be found."));
         }
+
         return aclUser;
     }
 
@@ -416,7 +416,7 @@ public class AclLogicImpl implements AclLogic {
                 SimpleAclUser userUser = new SimpleAclUser("user", "password");
 
                 adminUser.setAclRoles(new HashSet<>(Arrays.asList(adminRole, userRole)));
-                userUser.setAclRoles(new HashSet<>(Arrays.asList(userRole)));
+                userUser.setAclRoles(new HashSet<>(Collections.singletonList(userRole)));
 
                 em.persist(adminUser);
                 em.persist(userUser);
@@ -438,5 +438,4 @@ public class AclLogicImpl implements AclLogic {
             return role;
         }
     }
-
 }

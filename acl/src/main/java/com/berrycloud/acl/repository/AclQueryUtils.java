@@ -63,10 +63,7 @@ import org.springframework.util.Assert;
  * @author Christoph Strobl
  * @author István Rátkai (Selindek)
  */
-public class AclQueryUtils {
-
-    public static final String COUNT_QUERY_STRING = "select count(%s) from %s x";
-    public static final String DELETE_ALL_QUERY_STRING = "delete from %s x";
+class AclQueryUtils {
 
     private static final String IDENTIFIER = "[\\p{Lu}\\P{InBASIC_LATIN}\\p{Alnum}._$]+";
     private static final String IDENTIFIER_GROUP = String.format("(%s)", IDENTIFIER);
@@ -74,7 +71,6 @@ public class AclQueryUtils {
     private static final Map<PersistentAttributeType, Class<? extends Annotation>> ASSOCIATION_TYPES;
 
     static {
-
         StringBuilder builder = new StringBuilder();
         builder.append("(?<=from)"); // from as starting delimiter
         builder.append("(?:\\s)+"); // at least one space separating
@@ -90,7 +86,7 @@ public class AclQueryUtils {
         builder.append(IDENTIFIER_GROUP);
         builder.append("(.*)");
 
-        Map<PersistentAttributeType, Class<? extends Annotation>> persistentAttributeTypes = new HashMap<PersistentAttributeType, Class<? extends Annotation>>();
+        Map<PersistentAttributeType, Class<? extends Annotation>> persistentAttributeTypes = new HashMap<>();
         persistentAttributeTypes.put(ONE_TO_ONE, OneToOne.class);
         persistentAttributeTypes.put(ONE_TO_MANY, null);
         persistentAttributeTypes.put(MANY_TO_ONE, ManyToOne.class);
@@ -115,7 +111,6 @@ public class AclQueryUtils {
         builder.append("\\s+"); // at least one space
         builder.append("\\w+\\([0-9a-zA-z\\._,\\s']+\\)"); // any function call including parameters within the brackets
         builder.append("\\s+[as|AS]+\\s+(([\\w\\.]+))"); // the potential alias
-
     }
 
     /**
@@ -136,9 +131,8 @@ public class AclQueryUtils {
      *            must not be {@literal null}.
      * @return
      */
-    public static List<javax.persistence.criteria.Order> toOrders(Sort sort, From<?, ?> root, CriteriaBuilder cb) {
-
-        List<javax.persistence.criteria.Order> orders = new ArrayList<javax.persistence.criteria.Order>();
+    static List<javax.persistence.criteria.Order> toOrders(Sort sort, From<?, ?> root, CriteriaBuilder cb) {
+        List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 
         if (sort == null) {
             return orders;
@@ -154,7 +148,6 @@ public class AclQueryUtils {
         return orders;
     }
 
-
     /**
      * Creates a criteria API {@link javax.persistence.criteria.Order} from the given {@link Order}.
      *
@@ -168,7 +161,6 @@ public class AclQueryUtils {
      */
     @SuppressWarnings("unchecked")
     private static javax.persistence.criteria.Order toJpaOrder(Order order, From<?, ?> root, CriteriaBuilder cb) {
-
         PropertyPath property = PropertyPath.from(order.getProperty(), root.getJavaType());
         Expression<?> expression = toExpressionRecursively(root, property);
 
@@ -182,7 +174,6 @@ public class AclQueryUtils {
 
     @SuppressWarnings("unchecked")
     static <T> Expression<T> toExpressionRecursively(From<?, ?> from, PropertyPath property) {
-
         Bindable<?> propertyPathModel = null;
         Bindable<?> model = from.getModel();
         String segment = property.getSegment();
@@ -213,11 +204,10 @@ public class AclQueryUtils {
      *
      * @param propertyPathModel
      *            must not be {@literal null}.
-     * @param for
+     * @param forPluralAttribute
      * @return
      */
     private static boolean requiresJoin(Bindable<?> propertyPathModel, boolean forPluralAttribute) {
-
         if (propertyPathModel == null && forPluralAttribute) {
             return true;
         }
@@ -250,7 +240,6 @@ public class AclQueryUtils {
     }
 
     static Expression<Object> toExpressionRecursively(Path<Object> path, PropertyPath property) {
-
         Path<Object> result = path.get(property.getSegment());
         return property.hasNext() ? toExpressionRecursively(result, property.next()) : result;
     }
@@ -265,11 +254,8 @@ public class AclQueryUtils {
      * @return will never be {@literal null}.
      */
     private static Join<?, ?> getOrCreateJoin(From<?, ?> from, String attribute) {
-
         for (Join<?, ?> join : from.getJoins()) {
-
             boolean sameName = join.getAttribute().getName().equals(attribute);
-
             if (sameName && join.getJoinType().equals(JoinType.LEFT)) {
                 return join;
             }
@@ -288,11 +274,8 @@ public class AclQueryUtils {
      * @return
      */
     private static boolean isAlreadyFetched(From<?, ?> from, String attribute) {
-
         for (Fetch<?, ?> f : from.getFetches()) {
-
             boolean sameName = f.getAttribute().getName().equals(attribute);
-
             if (sameName && f.getJoinType().equals(JoinType.LEFT)) {
                 return true;
             }
@@ -300,5 +283,4 @@ public class AclQueryUtils {
 
         return false;
     }
-
 }

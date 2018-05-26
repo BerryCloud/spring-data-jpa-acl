@@ -45,6 +45,7 @@ public class AclPersistenceUnitPostProcessor implements PersistenceUnitPostProce
             pui.addManagedClassName(SimpleAclUser.class.getName());
             LOG.info("{} was added to managed entities.", SimpleAclUser.class);
         }
+
         if (missClass(entityClasses, AclRole.class)) {
             pui.addManagedClassName(SimpleAclRole.class.getName());
             LOG.info("{} was added to managed entities.", SimpleAclRole.class);
@@ -61,7 +62,7 @@ public class AclPersistenceUnitPostProcessor implements PersistenceUnitPostProce
     }
 
     private static List<Class<?>> createClasses(MutablePersistenceUnitInfo pui) {
-        List<Class<?>> list = new ArrayList<Class<?>>();
+        List<Class<?>> list = new ArrayList<>();
         for (String entityName : pui.getManagedClassNames()) {
             try {
                 list.add(Class.forName(entityName));
@@ -71,5 +72,4 @@ public class AclPersistenceUnitPostProcessor implements PersistenceUnitPostProce
         }
         return list;
     }
-
 }

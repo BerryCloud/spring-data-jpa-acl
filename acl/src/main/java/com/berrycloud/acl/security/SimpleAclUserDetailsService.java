@@ -15,6 +15,7 @@
  */
 package com.berrycloud.acl.security;
 
+import com.berrycloud.acl.AclLogic;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -23,9 +24,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  * is no any {@link UserDetailsService} bean in the context.
  *
  * @author István Rátkai (Selindek)
- *
  */
 public class SimpleAclUserDetailsService extends AbstractAclUserDetailsService<SimpleGrantedAuthority> {
+
+    public SimpleAclUserDetailsService(AclLogic aclLogic) {
+        super(aclLogic);
+    }
 
     @Override
     public SimpleGrantedAuthority createGrantedAuthority(String authority) {
