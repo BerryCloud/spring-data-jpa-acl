@@ -166,7 +166,7 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
     public ResponseEntity<? extends ResourceSupport> deletePropertyReference(final RootResourceInformation repoRequest,
             @BackendId Serializable id, @PathVariable String property) throws Exception {
 
-        AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(repoRequest.getDomainType());
+        final AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(repoRequest.getDomainType());
         // final RepositoryInvoker repoMethodInvoker = repoRequest.getInvoker();
 
         Function<ReferencedProperty, ResourceSupport> handler = new Function<ReferencedProperty, ResourceSupport>() {
@@ -291,9 +291,9 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
             final @RequestBody(required = false) Resources<Object> incoming, @BackendId Serializable id,
             @PathVariable String property) throws Exception {
 
-        final Resources<Object> source = incoming == null ? new Resources<Object>(Collections.emptyList()) : incoming;
+        final Resources<Object> source = incoming == null ? new Resources<>(Collections.emptyList()) : incoming;
         // final RepositoryInvoker invoker = resourceInformation.getInvoker();
-        AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(resourceInformation.getDomainType());
+        final AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(resourceInformation.getDomainType());
 
         Function<ReferencedProperty, ResourceSupport> handler = new Function<ReferencedProperty, ResourceSupport>() {
 
@@ -373,7 +373,7 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
             throws Exception {
 
         // final RepositoryInvoker invoker = repoRequest.getInvoker();
-        AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(repoRequest.getDomainType());
+        final AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(repoRequest.getDomainType());
 
         Function<ReferencedProperty, ResourceSupport> handler = new Function<ReferencedProperty, ResourceSupport>() {
 

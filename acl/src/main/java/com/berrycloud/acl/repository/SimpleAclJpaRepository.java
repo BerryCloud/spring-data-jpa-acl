@@ -296,7 +296,7 @@ public class SimpleAclJpaRepository<T, ID extends Serializable> extends SimpleJp
     }
 
     @Override
-    public T findOne(ID id, String permission) {
+    public T findOne(final ID id, String permission) {
         Assert.notNull(id, ID_MUST_NOT_BE_NULL);
         return findOne(new Specification<T>() {
 

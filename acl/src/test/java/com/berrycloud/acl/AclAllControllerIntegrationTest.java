@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.nio.charset.Charset;
 import java.util.Locale;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,7 +50,7 @@ import com.berrycloud.acl.sample.all.repository.RoleRepository;
 @Transactional
 public class AclAllControllerIntegrationTest {
 
-    public static final MediaType APPLICATION_JSON_UTF8 = new MediaType(MediaType.APPLICATION_JSON.getType(),
+    private static final MediaType APPLICATION_JSON_UTF8 = new MediaType(MediaType.APPLICATION_JSON.getType(),
             MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
 
     @Autowired
@@ -61,9 +62,9 @@ public class AclAllControllerIntegrationTest {
     @Autowired
     private RoleRepository roleRepository;
 
-    SimpleAclRole adminRole, userRole, editorRole, manipulatorRole;
+    private SimpleAclRole adminRole, userRole, editorRole, manipulatorRole;
 
-    Person admin, user, user2, user3, user4;
+    private Person admin, user, user2, user3, user4;
 
     @Autowired
     WebApplicationContext ctx;
@@ -365,7 +366,7 @@ public class AclAllControllerIntegrationTest {
         // @formatter:on
 
         assertThat(personRepositoryNoAcl.findOne(user2.getId()).getSupervisors(),
-                not(hasItem(hasProperty("username", is("user")))));
+                not(CoreMatchers.<Person>hasItem(hasProperty("username", is("user")))));
     }
 
     @Test
@@ -382,7 +383,7 @@ public class AclAllControllerIntegrationTest {
         // @formatter:on
 
         assertThat(personRepositoryNoAcl.findOne(user2.getId()).getSupervisors(),
-                hasItem(hasProperty("username", is("admin"))));
+                CoreMatchers.<Person>hasItem(hasProperty("username", is("admin"))));
     }
 
     @Test
@@ -492,17 +493,13 @@ public class AclAllControllerIntegrationTest {
                 .header("Authorization", "Basic dXNlcjpwYXNzd29yZA==") // user
                 .contentType(RestMediaTypes.TEXT_URI_LIST).locale(Locale.UK)
                 .content("/persons/" + admin.getId() + "\n/persons/" + user.getId()).accept(MediaType.APPLICATION_JSON))
-
-                .andExpect(status().isNoContent()).andExpect(redirectedUrl(null)).andExpect(forwardedUrl(null))
-
-        ;
+                .andExpect(status().isNoContent()).andExpect(redirectedUrl(null)).andExpect(forwardedUrl(null));
         // @formatter:on
 
         assertThat(personRepositoryNoAcl.findOne(user3.getId()).getSupervisors(),
-                hasItem(hasProperty("username", is("user"))));
+                CoreMatchers.<Person>hasItem(hasProperty("username", is("user"))));
         assertThat(personRepositoryNoAcl.findOne(user3.getId()).getSupervisors(),
-                not(hasItem(hasProperty("username", is("admin")))));
-
+                not(CoreMatchers.<Person>hasItem(hasProperty("username", is("admin")))));
     }
 
     @Test
@@ -513,17 +510,13 @@ public class AclAllControllerIntegrationTest {
                 .header("Authorization", "Basic dXNlcjpwYXNzd29yZA==") // user
                 .contentType(RestMediaTypes.TEXT_URI_LIST).locale(Locale.UK)
                 .content("/persons/" + admin.getId() + "\n/persons/" + user.getId()).accept(MediaType.APPLICATION_JSON))
-
-                .andExpect(status().isNoContent()).andExpect(redirectedUrl(null)).andExpect(forwardedUrl(null))
-
-        ;
+                .andExpect(status().isNoContent()).andExpect(redirectedUrl(null)).andExpect(forwardedUrl(null));
         // @formatter:on
 
         assertThat(personRepositoryNoAcl.findOne(user3.getId()).getSupervisors(),
-                hasItem(hasProperty("username", is("user"))));
+                CoreMatchers.<Person>hasItem(hasProperty("username", is("user"))));
         assertThat(personRepositoryNoAcl.findOne(user3.getId()).getSupervisors(),
-                not(hasItem(hasProperty("username", is("admin")))));
-
+                not(CoreMatchers.<Person>hasItem(hasProperty("username", is("admin")))));
     }
 
     @Test
@@ -558,14 +551,12 @@ public class AclAllControllerIntegrationTest {
         // @formatter:on
 
         assertThat(personRepositoryNoAcl.findOne(user2.getId()).getSupervisors(),
-                hasItem(hasProperty("username", is("user"))));
+                CoreMatchers.<Person>hasItem(hasProperty("username", is("user"))));
         assertThat(personRepositoryNoAcl.findOne(user2.getId()).getSupervisors(),
-                hasItem(hasProperty("username", is("admin"))));
+                CoreMatchers.<Person>hasItem(hasProperty("username", is("admin"))));
         assertThat(personRepositoryNoAcl.findOne(user2.getId()).getSupervisors(),
-                hasItem(hasProperty("username", is("user3"))));
+                CoreMatchers.<Person>hasItem(hasProperty("username", is("user3"))));
         assertThat(personRepositoryNoAcl.findOne(user2.getId()).getSupervisors(),
-                not(hasItem(hasProperty("username", is("user4")))));
-
+                not(CoreMatchers.<Person>hasItem(hasProperty("username", is("user4")))));
     }
-
 }
