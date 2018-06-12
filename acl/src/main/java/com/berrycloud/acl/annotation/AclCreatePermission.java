@@ -19,7 +19,6 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -31,13 +30,12 @@ import java.lang.annotation.Target;
  * <p>
  * This annotation can be used multiple times.
  *
- * @@author István Rátkai (Selindek)
+ * @author István Rátkai (Selindek)
  *
  */
 @Target({ TYPE })
 @Retention(RUNTIME)
 @Documented
-@Repeatable(value = AclCreatePermissions.class)
 public @interface AclCreatePermission {
 
     /**

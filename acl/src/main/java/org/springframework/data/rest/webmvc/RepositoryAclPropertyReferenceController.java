@@ -97,7 +97,6 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
 
     private ApplicationEventPublisher publisher;
 
-    @Autowired
     public RepositoryAclPropertyReferenceController(Repositories repositories,
             RepositoryInvokerFactory repositoryInvokerFactory, PagedResourcesAssembler<Object> assembler) {
 
@@ -140,7 +139,7 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
 
                 } else if (prop.property.isMap()) {
 
-                    Map<Object, Resource<?>> resources = new HashMap<Object, Resource<?>>();
+                    Map<Object, Resource<?>> resources = new HashMap<>();
 
                     for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) prop.propertyValue).entrySet()) {
                         resources.put(entry.getKey(), assembler.toResource(entry.getValue()));
@@ -166,7 +165,7 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
     public ResponseEntity<? extends ResourceSupport> deletePropertyReference(final RootResourceInformation repoRequest,
             @BackendId Serializable id, @PathVariable String property) throws Exception {
 
-        AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(repoRequest.getDomainType());
+        final AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(repoRequest.getDomainType());
         // final RepositoryInvoker repoMethodInvoker = repoRequest.getInvoker();
 
         Function<ReferencedProperty, ResourceSupport> handler = new Function<ReferencedProperty, ResourceSupport>() {
@@ -222,7 +221,7 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
                     headers.set("Content-Location", resource.getId().getHref());
                     return resource;
                 } else {
-                    return new Resource<Object>(prop.propertyValue);
+                    return new Resource<>(prop.propertyValue);
                 }
             }
         };
@@ -251,7 +250,7 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
 
         ResourceSupport resource = response.getBody();
 
-        List<Link> links = new ArrayList<Link>();
+        List<Link> links = new ArrayList<>();
 
         ControllerLinkBuilder linkBuilder = linkTo(methodOn(RepositoryAclPropertyReferenceController.class)
                 .followPropertyReference(repoRequest, id, property, assembler, pageable));
@@ -291,9 +290,9 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
             final @RequestBody(required = false) Resources<Object> incoming, @BackendId Serializable id,
             @PathVariable String property) throws Exception {
 
-        final Resources<Object> source = incoming == null ? new Resources<Object>(Collections.emptyList()) : incoming;
+        final Resources<Object> source = incoming == null ? new Resources<>(Collections.emptyList()) : incoming;
         // final RepositoryInvoker invoker = resourceInformation.getInvoker();
-        AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(resourceInformation.getDomainType());
+        final AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(resourceInformation.getDomainType());
 
         Function<ReferencedProperty, ResourceSupport> handler = new Function<ReferencedProperty, ResourceSupport>() {
 
@@ -373,7 +372,7 @@ class RepositoryAclPropertyReferenceController extends AbstractRepositoryRestCon
             throws Exception {
 
         // final RepositoryInvoker invoker = repoRequest.getInvoker();
-        AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(repoRequest.getDomainType());
+        final AclJpaRepository<Object, Serializable> aclRepository = getAclRepository(repoRequest.getDomainType());
 
         Function<ReferencedProperty, ResourceSupport> handler = new Function<ReferencedProperty, ResourceSupport>() {
 

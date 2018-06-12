@@ -48,11 +48,13 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
     // Dynamically filled cache for entityInformation
     private final Map<Class<?>, JpaEntityInformation<?, ?>> entityInformationMap = new HashMap<>();
 
-    @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
+    private final AclSpecification aclSpecification;
 
-    @Autowired
-    private AclSpecification aclSpecification;
+    public AclPermissionEvaluator(final EntityManager em, AclSpecification aclSpecification) {
+        this.em = em;
+        this.aclSpecification = aclSpecification;
+    }
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
@@ -105,8 +107,7 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
         Class<T> domainClass = (Class<T>) object.getClass();
         JpaEntityInformation<T, ?> entityInformation = getEntityInformation(domainClass);
 
-        Object id = entityInformation.getId(object);
-        return id;
+        return entityInformation.getId(object);
     }
 
     protected <T> JpaEntityInformation<T, ?> getEntityInformation(Class<T> domainClass) {
@@ -123,5 +124,4 @@ public class AclPermissionEvaluator implements PermissionEvaluator {
     protected String getPermissionString(Object permission) {
         return permission.toString();
     }
-
 }

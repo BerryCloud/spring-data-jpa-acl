@@ -94,7 +94,6 @@ public class JacksonMappingAwarePropertySortTranslator {
      *         contains no properties.
      */
     protected Sort translateSort(Sort input, MethodParameter parameter, NativeWebRequest webRequest) {
-
         Assert.notNull(input, "Sort must not be null!");
         Assert.notNull(parameter, "MethodParameter must not be null!");
         Assert.notNull(webRequest, "NativeWebRequest must not be null!");
@@ -154,11 +153,11 @@ public class JacksonMappingAwarePropertySortTranslator {
             Assert.notNull(input, "Sort must not be null!");
             Assert.notNull(rootEntity, "PersistentEntity must not be null!");
 
-            List<Order> filteredOrders = new ArrayList<Order>();
+            List<Order> filteredOrders = new ArrayList<>();
 
             for (Order order : input) {
 
-                List<String> iteratorSource = new ArrayList<String>();
+                List<String> iteratorSource = new ArrayList<>();
                 Matcher matcher = SPLITTER.matcher("_" + order.getProperty());
 
                 while (matcher.find()) {
@@ -176,7 +175,6 @@ public class JacksonMappingAwarePropertySortTranslator {
         }
 
         private String getMappedPropertyPath(PersistentEntity<?, ?> rootEntity, List<String> iteratorSource) {
-
             List<String> persistentPropertyPath = mapPropertyPath(rootEntity, iteratorSource);
 
             if (persistentPropertyPath.isEmpty()) {
@@ -187,9 +185,7 @@ public class JacksonMappingAwarePropertySortTranslator {
         }
 
         private List<String> mapPropertyPath(PersistentEntity<?, ?> rootEntity, List<String> iteratorSource) {
-
-            List<String> persistentPropertyPath = new ArrayList<String>(iteratorSource.size());
-
+            List<String> persistentPropertyPath = new ArrayList<>(iteratorSource.size());
             TypedSegment typedSegment = TypedSegment.create(persistentEntities, objectMapper, rootEntity);
 
             for (String field : iteratorSource) {
@@ -204,7 +200,6 @@ public class JacksonMappingAwarePropertySortTranslator {
                         .getPersistentProperties(fieldName);
 
                 for (PersistentProperty<?> persistentProperty : persistentProperties) {
-
                     if (associations.isLinkableAssociation(persistentProperty)) {
                         return Collections.emptyList();
                     }
@@ -287,22 +282,18 @@ public class JacksonMappingAwarePropertySortTranslator {
          * @return
          */
         public TypedSegment next(PersistentProperty<?> persistentProperty) {
-
             Assert.notNull(persistentProperty, "PersistentProperty must not be null!");
-
             PersistentEntity<?, ?> persistentEntity = persistentEntities
                     .getPersistentEntity(persistentProperty.getType());
             return new TypedSegment(this, persistentEntity);
         }
 
         private boolean hasPersistentPropertyForField(String fieldName) {
-
             return currentType != null && (currentProperties.hasPersistentPropertyForField(fieldName)
                     || currentWrappedProperties.hasPersistentPropertiesForField(fieldName));
         }
 
         private List<? extends PersistentProperty<?>> getPersistentProperties(String fieldName) {
-
             if (currentWrappedProperties.hasPersistentPropertiesForField(fieldName)) {
                 return currentWrappedProperties.getPersistentProperties(fieldName);
             }

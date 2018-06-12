@@ -31,12 +31,12 @@ import java.util.Set;
  */
 public class PermissionData {
 
-    private Set<String> permissions;
-    private Set<String> allPrefixes;
+    private final Set<String> permissions;
+    private final Set<String> allPrefixes;
 
     public PermissionData(String[] permissions) {
-        this.permissions = new HashSet<String>(Arrays.asList(permissions));
-        this.allPrefixes = new HashSet<String>();
+        this.permissions = new HashSet<>(Arrays.asList(permissions));
+        this.allPrefixes = new HashSet<>();
         calculatePermissions();
     }
 
@@ -60,5 +60,4 @@ public class PermissionData {
         String prefix = permission.substring(0, getPermissionIndex(permission));
         return allPrefixes.contains(prefix) || permissions.contains(permission);
     }
-
 }

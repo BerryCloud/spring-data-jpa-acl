@@ -76,5 +76,4 @@ public class AclEntityMetaData {
     public void setCreatePermissionList(List<CreatePermissionData> createPermissionList) {
         this.createPermissionList = createPermissionList;
     }
-
 }

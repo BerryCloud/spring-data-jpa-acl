@@ -24,13 +24,13 @@ import com.berrycloud.acl.annotation.AclOwner;
  */
 public class OwnerData extends PropertyPermissionData {
 
-    private boolean collection;
-    private Class<?> propertyType;
+    private final Class<?> propertyType;
+    private final boolean collection;
 
     public OwnerData(String propertyName, Class<?> propertyType, boolean collection, String[] permissions) {
         super(propertyName, permissions);
-        this.collection = collection;
         this.propertyType = propertyType;
+        this.collection = collection;
     }
 
     public boolean isCollection() {
@@ -40,5 +40,4 @@ public class OwnerData extends PropertyPermissionData {
     public Class<?> getPropertyType() {
         return propertyType;
     }
-
 }

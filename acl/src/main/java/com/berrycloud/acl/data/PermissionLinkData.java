@@ -22,8 +22,8 @@ package com.berrycloud.acl.data;
  */
 public class PermissionLinkData {
 
-    private String propertyName;
-    private String permissionField;
+    private final String propertyName;
+    private final String permissionField;
 
     public PermissionLinkData(String propertyName, String permissionField) {
         this.propertyName = propertyName;
@@ -37,5 +37,4 @@ public class PermissionLinkData {
     public String getPermissionField() {
         return permissionField;
     }
-
 }

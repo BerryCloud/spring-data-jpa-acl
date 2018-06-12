@@ -15,15 +15,12 @@
  */
 package com.berrycloud.acl.configuration.rest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.data.rest.RepositoryRestProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.rest.webmvc.BasePathAwareHandlerMapping;
@@ -38,6 +35,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.HandlerMapping;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * This configuration class is activated only if spring-data-rest-webmvc is in the classpath. It overrides some of the
  * original beans of the the data-rest module to make it compatible with the ACL package.
@@ -49,10 +50,9 @@ import org.springframework.web.servlet.HandlerMapping;
 @ConditionalOnClass(value = RepositoryRestMvcConfiguration.class)
 @EnableConfigurationProperties(RepositoryRestProperties.class)
 @Import({ SpringBootRepositoryRestConfigurer.class })
-public class AclRepositoryRestConfiguration extends RepositoryRestMvcConfiguration {
+public class AclRepositoryRestConfiguration extends RepositoryRestMvcConfiguration implements ApplicationContextAware {
 
-    @Autowired
-    ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
     /**
      * The PageableResolver what is constructed in the super method is not handling the domain-properties, so we have to
@@ -83,12 +83,11 @@ public class AclRepositoryRestConfiguration extends RepositoryRestMvcConfigurati
     }
 
     /**
-     * By overriding this method we can exclude the original {@link RepositoryPropertyReferenceController} from the
-     * handler-mapping.
+     * By overriding this method we can exclude the original
+     * {@link org.springframework.data.rest.webmvc.RepositoryPropertyReferenceController} from the handler-mapping.
      */
     @Override
     public DelegatingHandlerMapping restHandlerMapping() {
-
         Map<String, CorsConfiguration> corsConfigurations = config().getCorsRegistry().getCorsConfigurations();
 
         RepositoryRestHandlerMapping repositoryMapping = new RepositoryRestHandlerMapping(resourceMappings(), config(),
@@ -100,6 +99,7 @@ public class AclRepositoryRestConfiguration extends RepositoryRestMvcConfigurati
                         && !beanType.getSimpleName().equals("RepositoryEntityController");
             }
         };
+
         repositoryMapping.setJpaHelper(jpaHelper());
         repositoryMapping.setApplicationContext(applicationContext);
         repositoryMapping.setCorsConfigurations(corsConfigurations);
@@ -115,5 +115,10 @@ public class AclRepositoryRestConfiguration extends RepositoryRestMvcConfigurati
         mappings.add(repositoryMapping);
 
         return new DelegatingHandlerMapping(mappings);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

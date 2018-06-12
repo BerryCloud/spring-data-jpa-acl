@@ -9,6 +9,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -104,9 +105,9 @@ public class AclAllRepositoryIntegrationTest {
     @Autowired
     private PersonService personService;
 
-    SimpleAclRole adminRole, userRole, editorRole, manipulatorRole;
+    private SimpleAclRole adminRole, userRole, editorRole, manipulatorRole;
 
-    Person admin, user, user2, user3;
+    private Person admin, user, user2, user3;
 
     @Before
     public void initTests() {
@@ -280,7 +281,7 @@ public class AclAllRepositoryIntegrationTest {
     public void testGivenAdminAuthenticationWhenCallDeleteEmptyCollectionThenNothingIsDeleted() {
         setAuthentication("admin");
         long count = personRepository.count();
-        personRepository.deleteInBatch(new HashSet<>());
+        personRepository.deleteInBatch(new HashSet<Person>());
         assertThat(personRepository.count(), is(count));
     }
 
@@ -300,7 +301,7 @@ public class AclAllRepositoryIntegrationTest {
         setAuthentication(null);
         Person deleteUser = new Person("delme", "d", "d");
         personRepository.saveWithoutPermissionCheck(deleteUser);
-        personRepositoryNoAcl.deleteInBatch(Arrays.asList(deleteUser));
+        personRepositoryNoAcl.deleteInBatch(Collections.singletonList(deleteUser));
         assertNull(personRepositoryNoAcl.findOne(deleteUser.getId()));
     }
 
@@ -334,7 +335,7 @@ public class AclAllRepositoryIntegrationTest {
         deleteUser.setCreatedBy(user);
         personRepositoryNoAcl.save(deleteUser);
         personRepositoryNoAcl.deleteAllInBatch();
-        assertThat(personRepositoryNoAcl.count(), is(0l));
+        assertThat(personRepositoryNoAcl.count(), is(0L));
     }
 
     @Test
@@ -426,7 +427,7 @@ public class AclAllRepositoryIntegrationTest {
 
     @Test
     public void testGivenEmptyCollectionWhenCallfindAllThenReturnEmptyArray() {
-        assertThat(personRepositoryNoAcl.findAll(Arrays.asList(), AclConstants.READ_PERMISSION).size(), is(0));
+        assertThat(personRepositoryNoAcl.findAll(Collections.<Integer>emptyList(), AclConstants.READ_PERMISSION).size(), is(0));
     }
 
     @Test

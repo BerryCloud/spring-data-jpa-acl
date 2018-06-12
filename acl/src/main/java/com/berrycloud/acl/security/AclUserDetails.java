@@ -15,18 +15,17 @@
  */
 package com.berrycloud.acl.security;
 
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+
 /**
  * Simple extension of {@link UserDetails} interface what defines a method for retrieving the id of the current user.
  * (The id of the underlying AclUser domain object in the DB)
  *
  * @author István Rátkai (Selindek)
  */
-import java.io.Serializable;
-
-import org.springframework.security.core.userdetails.UserDetails;
-
 public interface AclUserDetails extends UserDetails {
 
     Serializable getUserId();
-
 }

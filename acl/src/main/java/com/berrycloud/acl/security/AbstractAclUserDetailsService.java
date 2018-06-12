@@ -37,15 +37,16 @@ import com.berrycloud.acl.domain.AclUser;
 public abstract class AbstractAclUserDetailsService<A extends GrantedAuthority> implements AclUserDetailsService<A> {
     // TODO extend it to a UserDetailsManager ???
 
-    @Autowired
-    private AclLogic aclLogic;
+    private final AclLogic aclLogic;
+
+    protected AbstractAclUserDetailsService(AclLogic aclLogic) {
+        this.aclLogic = aclLogic;
+    }
 
     @Override
     @Transactional(readOnly = true)
     public AclUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
         AclUser aclUser = aclLogic.loadUserByUsername(username);
-
         return createUserDetails(aclUser, createAuthorities(aclLogic.getAllRoles(aclUser)));
     }
 
@@ -61,7 +62,7 @@ public abstract class AbstractAclUserDetailsService<A extends GrantedAuthority> 
     }
 
     protected Collection<A> createAuthorities(Set<AclRole> roleSet) {
-        Set<A> grantedAuthorities = new HashSet<A>();
+        Set<A> grantedAuthorities = new HashSet<>();
         for (AclRole role : roleSet) {
             grantedAuthorities.add(createGrantedAuthority(role.getRoleName()));
         }
@@ -70,5 +71,4 @@ public abstract class AbstractAclUserDetailsService<A extends GrantedAuthority> 
 
     @Override
     public abstract A createGrantedAuthority(String authority);
-
 }

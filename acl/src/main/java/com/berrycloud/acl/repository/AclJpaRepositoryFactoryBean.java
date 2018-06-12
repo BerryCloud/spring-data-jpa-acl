@@ -15,16 +15,14 @@
  */
 package com.berrycloud.acl.repository;
 
-import java.io.Serializable;
-
-import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-
+import com.berrycloud.acl.AclSpecification;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 
-import com.berrycloud.acl.AclSpecification;
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import java.io.Serializable;
 
 /**
  * Adapter for aclRepository factories.
@@ -35,7 +33,7 @@ public class AclJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exte
         extends JpaRepositoryFactoryBean<T, S, ID> {
 
     @Resource
-    AclSpecification aclSpecification;
+    private AclSpecification aclSpecification;
 
     public AclJpaRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
         super(repositoryInterface);
@@ -45,5 +43,4 @@ public class AclJpaRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exte
     protected RepositoryFactorySupport createRepositoryFactory(EntityManager entityManager) {
         return new AclJpaRepositoryFactory(entityManager, aclSpecification);
     }
-
 }

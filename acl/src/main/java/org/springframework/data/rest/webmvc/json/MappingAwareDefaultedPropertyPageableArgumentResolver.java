@@ -52,7 +52,6 @@ public class MappingAwareDefaultedPropertyPageableArgumentResolver implements Ha
 
         this.translator = translator;
         this.delegate = delegate;
-
     }
 
     /*

@@ -18,8 +18,10 @@ package com.berrycloud.acl;
 import java.io.Serializable;
 import java.util.Set;
 
+import com.berrycloud.acl.data.AclMetaData;
 import com.berrycloud.acl.domain.AclRole;
 import com.berrycloud.acl.domain.AclUser;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Interface for AclLogic methods
@@ -35,4 +37,7 @@ public interface AclLogic {
     Serializable getUserId(AclUser user);
 
     boolean isManagedType(Class<?> javaType);
+
+    @Transactional
+    AclMetaData createAclMetaData();
 }

@@ -22,7 +22,7 @@ package com.berrycloud.acl.data;
  */
 public class PropertyPermissionData extends PermissionData {
 
-    private String propertyName;
+    private final String propertyName;
 
     public PropertyPermissionData(String propertyName, String[] permissions) {
         super(permissions);
@@ -32,5 +32,4 @@ public class PropertyPermissionData extends PermissionData {
     public String getPropertyName() {
         return propertyName;
     }
-
 }

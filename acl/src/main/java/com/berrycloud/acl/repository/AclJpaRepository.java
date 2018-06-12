@@ -15,14 +15,13 @@
  */
 package com.berrycloud.acl.repository;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.persistence.EntityNotFoundException;
-
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import javax.persistence.EntityNotFoundException;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Repository interface extension for loading entities by non-default permission. Most ethods are used by
@@ -36,10 +35,8 @@ public interface AclJpaRepository<T, ID extends Serializable> extends PropertyRe
      * Find an entity by id with testing the current user's permission against the given permission during
      * permission-check
      *
-     * @param id
-     *            the id of the entity
-     * @param permission
-     *            the permission we check against
+     * @param id         the id of the entity
+     * @param permission the permission we check against
      * @return the entity with the given id or null if it's not exist or the current user has no proper permission to it
      */
     T findOne(ID id, String permission);
@@ -48,13 +45,10 @@ public interface AclJpaRepository<T, ID extends Serializable> extends PropertyRe
      * Find an entity by id with testing the current user's permission against the given permission during
      * permission-check
      *
-     * @param id
-     *            the id of the entity
-     * @param permission
-     *            the permission we check against
+     * @param id         the id of the entity
+     * @param permission the permission we check against
      * @return the entity with the given id
-     * @throws EntityNotFoundException
-     *             if the entity cannot be found or the current user has no proper permission to it
+     * @throws EntityNotFoundException if the entity cannot be found or the current user has no proper permission to it
      */
     T getOne(ID id, String permission);
 
@@ -73,19 +67,15 @@ public interface AclJpaRepository<T, ID extends Serializable> extends PropertyRe
      * Delete the entity without permission check. This method should be used with extreme caution. The permission
      * should be checked manually before using this method. (I.e. methods protected by {@link PreAuthorize} annotation.)
      *
-     * @param entity
+     * @param entity the entity
      */
     void deleteWithoutPermissionCheck(T entity);
 
     /**
      * Find an entity by id with without testing the current user's permission to it.
      *
-     * @param id
-     *            the id of the entity
-     * @param permission
-     *            the permission we check against
+     * @param id the id of the entity
      * @return the entity with the given id or null if it's not exist or the current user has no proper permission to it
      */
     T findOneWithoutPermissionCheck(ID id);
-
 }

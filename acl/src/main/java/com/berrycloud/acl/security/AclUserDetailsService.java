@@ -42,5 +42,4 @@ public interface AclUserDetailsService<A extends GrantedAuthority> extends UserD
      * GrantedAuthority object for the whole Acl/security/authentication framework
      */
     A createGrantedAuthority(String authority);
-
 }

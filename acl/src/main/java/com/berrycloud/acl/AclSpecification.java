@@ -34,5 +34,4 @@ public interface AclSpecification extends Specification<Object> {
      * @return
      */
     boolean canBeCreated(Object newEntity);
-
 }

@@ -15,8 +15,8 @@
  */
 package com.berrycloud.acl.repository;
 
-import javax.persistence.EntityManager;
-
+import com.berrycloud.acl.AclSpecification;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.jpa.provider.PersistenceProvider;
 import org.springframework.data.jpa.provider.QueryExtractor;
 import org.springframework.data.jpa.repository.query.AclJpaQueryLookupStrategy;
@@ -28,13 +28,12 @@ import org.springframework.data.repository.query.EvaluationContextProvider;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
 
-import com.berrycloud.acl.AclSpecification;
+import javax.persistence.EntityManager;
 
 /**
  * JPA ACL repository factory.
  *
  * @author István Rátkai (Selindek)
- *
  */
 public class AclJpaRepositoryFactory extends JpaRepositoryFactory {
 
@@ -55,13 +54,13 @@ public class AclJpaRepositoryFactory extends JpaRepositoryFactory {
     }
 
     protected boolean isAclRepository(RepositoryMetadata metadata) {
-        NoAcl noAcl = metadata.getRepositoryInterface().getDeclaredAnnotation(NoAcl.class);
+        NoAcl noAcl = AnnotationUtils.findAnnotation(metadata.getRepositoryInterface(), NoAcl.class);
         return noAcl == null;
     }
 
     @Override
     protected SimpleJpaRepository<?, ?> getTargetRepository(RepositoryInformation information,
-            EntityManager entityManager) {
+                                                            EntityManager entityManager) {
         SimpleJpaRepository<?, ?> repository = super.getTargetRepository(information, entityManager);
         ((SimpleAclJpaRepository<?, ?>) repository)
                 .setAclSpecification(isAclRepository(information) ? aclSpecification : null);
@@ -73,5 +72,4 @@ public class AclJpaRepositoryFactory extends JpaRepositoryFactory {
         return AclJpaQueryLookupStrategy.create(entityManager, key, extractor, evaluationContextProvider,
                 aclSpecification);
     }
-
 }

@@ -24,7 +24,7 @@ import com.berrycloud.acl.annotation.AclCreatePermission;
  */
 public class CreatePermissionData {
 
-    private String[] authorities;
+    private final String[] authorities;
 
     public CreatePermissionData(String[] authorities) {
         this.authorities = authorities;
@@ -33,5 +33,4 @@ public class CreatePermissionData {
     public String[] getAuthorities() {
         return authorities;
     }
-
 }

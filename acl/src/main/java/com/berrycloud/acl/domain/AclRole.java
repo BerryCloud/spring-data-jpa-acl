@@ -32,5 +32,4 @@ public interface AclRole {
 
     @Column(nullable = false, unique = true)
     String getRoleName();
-
 }
