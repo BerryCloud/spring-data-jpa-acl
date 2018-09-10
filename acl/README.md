@@ -1,4 +1,4 @@
-# Spring Boot Data JPA ACL
+# Spring Boot Data JPA ACL (ONLY FOR SPRING BOOT 1 - SEE OTHER BRANCH FOR SPRING BOOT 2)
 
 This package is an extension for Spring Data JPA. It provides a fast an easily customizable access-control system for projects using Spring Repositories.
 
