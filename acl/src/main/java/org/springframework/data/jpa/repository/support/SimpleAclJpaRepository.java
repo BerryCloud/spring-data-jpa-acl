@@ -472,13 +472,14 @@ public class SimpleAclJpaRepository<T, ID> extends SimpleJpaRepository<T, ID> im
 
         Root<S> root = applySpecificationToCriteria(spec, domainClass, query, READ_PERMISSION);
         
+        From<?, ?> from = (From<?, ?>) query.getSelection();
+        if (from == null) {
+          from = root;
+        }
+        
         // Search can reduce the count 
         if (sort instanceof Search) {
             // PropertySpecifications can alter the selection of the query
-            From<?, ?> from = (From<?, ?>)query.getSelection();
-            if (from == null) {
-                from =root;
-            }
             aclSpecification.applySearch(query, builder, from, (Search)sort);
         }
         
