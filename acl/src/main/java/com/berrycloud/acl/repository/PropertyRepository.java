@@ -25,6 +25,8 @@ public interface PropertyRepository<T, ID> {
 
     Object findProperty(ID id, PersistentProperty<? extends PersistentProperty<?>> property, Object propertyId);
 
+    Object findPropertyComplement(ID id, PersistentProperty<? extends PersistentProperty<?>> property, Pageable pageable);
+
     /**
      * Helper method for calling clear on the EntityManager.
      *

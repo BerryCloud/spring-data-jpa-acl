@@ -1,8 +1,8 @@
 # Spring Boot Data JPA ACL (for Spring Boot 2 - See SB1 branch for Spring Boot 1)
 
-This package is an extension for Spring Data JPA. It provides a fast an easily customizable access-control system for projects using Spring Repositories.
+This package is an extension for Spring Data JPA. It provides a fast an easily customizable access-control system for projects using Spring Repositories. (Plus some useful extra features)
 
-ACL usually means 'Access Control List', but in this case it stands for 'Access Control Logic'. Although it could still use lists for permission control in some special cases most of the access decisions are made by predefined rules.
+ACL usually means 'Access Control List', but in this case it stands for 'Access Control Logic'. Although it could still use lists for permission control in some special cases, most of the access decisions are made by predefined access-logic rules.
 
 Let's see the main differences between traditional AC-List implementations and this package:
 
@@ -13,7 +13,11 @@ Let's see the main differences between traditional AC-List implementations and t
 5. It's compatible with Spring Data Jpa Repositories so the ACL is automatically applied for all standard repository methods.
 6. It's also compatible with Spring Data Rest. All of your restful endpoints are automatically secured by the ACL
 7. As a side-effect, you can use paginated queries on all property-collection endpoints under Spring Data Rest. (Property collections are also filtered by the ACL)
-8. In-built search feature for searching objects by text patterns. The result will contain all objects where all of the words of the search-pattern appear in any of the searchable properties of the domain object. (It could be also a paginated result-set)
+
+On top of the above advantages, the ACL also has the following in-built features:
+
+1. Search feature for searching objects by text patterns. The result will contain all objects where all of the words of the search-pattern appear in any of the searchable properties of the domain object. (It could be also a paginated result-set.) The search rules are also defined via annotations in the entity classes.
+2. Endpoints for complement-collections for collection-like properties. (Very handy feature for creating convenient UI for adding elements for collections.) Simply append the "Complement" at the end of any default Data Rest RepositoryProperty endpoint.
 
 ## Basics
 
@@ -504,20 +508,37 @@ Although this functionality is present primary for the REST endpoints, you can a
 Because of performance reasons the search logic handles only the first three words of the pattern. You can change it with the following property in your application.properties file:
 	
 	spring.data.jpa.acl.max-search-words=3
+
+## Complement endpoints
+
+Let's assume we have a Group entity with a members property. It has a 'members' property which is a collection of Users annotated with `@ManyToMany` annotation.
+The following request returns all the users who are members of a given group:
+`GET groups/12/members`
+If we want to create a state-of-the-art client for this API, then when a user want to add more users to a given group via the client, it would be nice if we could show all the available users who are NOT members of the given group, so the user can choose the new members from this shortened list instead of all the users.
+The following request returns with these users:
+`GET groups/12/membersComplement`
+
+This request could be also paginated and searchable, so all the extra parameters can be used just like on a normal property endpoint.
+
+`GET groups/12/membersComplement?page=2&size=5&search=mike`
+
+And the result set also will be filtered by the ACl - just like any other endpoints -, so it will contain only objects which the current user has permission to.
+
+This feature can be used on any collection-like property of any ACL-managed entity without any additional settings.
  
 ## Missing features
 
-Unfortunately the `@DataJpaTest` annotation what can be used for testing the JpaRepositories cannot be used together with this extension.
-If you have test classes in an existing project what uses this annotation then either turn off those tests by adding @Ignore or test the repository methods in a full context. 
+Unfortunately the `@DataJpaTest` annotation which can be used for testing the JpaRepositories cannot be used together with this extension.
+If you have test classes in an existing project where this annotation is in use, then either turn off those tests by adding @Ignore or test the repository methods in a full context. 
 
 ## Limitations
 
 There are some limitations if you want to use the ACL:
 
-- All domain entities must have a singular id attribute. If you really need compound primary key then a possible workaround is using @EmbeddedId annotation. Theoretically it can be resolved, but I rather spend my resources to add other functionalities and improvements.
-- All queries are forced to be distinct. At the moment I have no idea how can I resolve this issue. 
+- All domain entities must have a singular id attribute. If you really need composite primary key somewhere, then a possible workaround is using @EmbeddedId annotation. (Theoretically this issue could be resolved, but I rather spend my resources to add other functionalities and improvements.)
+- All ACl managed queries are forced to be distinct. At the moment I have no idea how can I resolve this issue. 
 - Search functionality doesn't work with unique queries (defined by `@Query` annotation).
-- ACL and pagination is not working on maps.
+- ACL and pagination is not working on maps (They are treated as common properties, not as collections).
 
 ## Conclusion
 

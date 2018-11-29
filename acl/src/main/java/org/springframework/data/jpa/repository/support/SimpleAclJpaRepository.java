@@ -41,6 +41,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Order;
@@ -49,6 +50,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
+import javax.persistence.criteria.Subquery;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.SingularAttribute;
 
@@ -137,7 +139,6 @@ public class SimpleAclJpaRepository<T, ID> extends SimpleJpaRepository<T, ID> im
     @Transactional
     public void deleteWithoutPermissionCheck(T entity) {
         super.delete(entity);
-        // em.remove(em.contains(entity) ? entity : em.merge(entity));
     }
 
     /*
@@ -252,7 +253,6 @@ public class SimpleAclJpaRepository<T, ID> extends SimpleJpaRepository<T, ID> im
     @Override
     public Optional<T> findByIdWithoutPermissionCheck(ID id) {
         return super.findById(id);
-        // return findById(id, null);
     }
 
     /*
@@ -386,12 +386,6 @@ public class SimpleAclJpaRepository<T, ID> extends SimpleJpaRepository<T, ID> im
     @Transactional
     public <S extends T> S saveWithoutPermissionCheck(S entity) {
         return super.save(entity);
-        // if (entityInformation.isNew(entity)) {
-        // em.persist(entity);
-        // return entity;
-        // } else {
-        // return em.merge(entity);
-        // }
     }
 
     /**
@@ -601,6 +595,13 @@ public class SimpleAclJpaRepository<T, ID> extends SimpleJpaRepository<T, ID> im
 
     @Override
     @Transactional
+    public Object findPropertyComplement(ID id, PersistentProperty<? extends PersistentProperty<?>> property, Pageable pageable) {
+        // Must be a collection-like property
+        return findAll(new PropertyComplementSpecification<>(id, property), pageable);
+    }
+    
+    @Override
+    @Transactional
     public Object findProperty(ID id, PersistentProperty<? extends PersistentProperty<?>> property, Object propertyId) {
         if (property.isCollectionLike() ) {
             return findOne(new PropertySpecification<>(id, property, propertyId)).orElse(null);
@@ -646,6 +647,42 @@ public class SimpleAclJpaRepository<T, ID> extends SimpleJpaRepository<T, ID> im
         }
 
     }
+    
+    private class PropertyComplementSpecification<S> implements Specification<S> {
+
+      private static final long serialVersionUID = -2102298802440666933L;
+
+      private String propertyName;
+      private ID ownerId;
+      private String ownerIdName;
+      private Class<?> propertyType;
+      
+      public PropertyComplementSpecification(ID id, PersistentProperty<? extends PersistentProperty<?>> property) {
+          this.propertyName = property.getName();
+          this.ownerId = id;
+          this.ownerIdName = property.getOwner().getIdProperty().getName();
+          this.propertyType=property.getActualType();
+      }
+
+      @SuppressWarnings({ "rawtypes", "unchecked" })
+      @Override
+      public Predicate toPredicate(Root<S> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+          query.getRoots().clear();
+          Root<?> propertyRoot = query.from(propertyType);
+          query.select((Selection) (propertyRoot));
+          
+          final Subquery<?> sq = query.subquery(root.getJavaType());
+          final Root<?> subRoot = sq.from(root.getJavaType());
+          Join<?, ?> subJoin = subRoot.join(propertyName);
+  
+          sq.select((Expression)subJoin);
+          sq.where(cb.equal(subRoot.get(ownerIdName), ownerId));
+          
+          return propertyRoot.in(sq).not();
+          
+      }
+
+  }
 
     /**
      * Specification that gives access to the {@link Parameter} instance used to bind the ids for
